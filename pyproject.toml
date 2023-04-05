@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "hikaxpro"
 version = "2.0.0"
 description = "Hikvision AX Pro alarm kit ISAPI integration for home assistant alarm panel"
+repository = "https://github.com/petrleocompel/hikaxpro/"
 readme = "README.md"
 authors = [
     { name = "Günkut Zeybek", email = "gunkut.zeybek@gmail.com" },
