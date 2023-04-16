@@ -148,29 +148,50 @@ class HikAxPro:
         param_prefix = "&" if "?" in endpoint else "?"
         return f"{endpoint}{param_prefix}format=json" if is_json else endpoint
 
-    def _base_json_request(self, url: str, method: consts.Method = consts.Method.GET):
+    def _base_json_request(self, url: str, method: consts.Method = consts.Method.GET, data=None):
         endpoint = self.build_url(url, True)
-        response = self.make_request(endpoint, method, is_json=True)
+        response = self.make_request(endpoint, method, is_json=True, data=data)
 
         if response.status_code != 200:
             raise errors.UnexpectedResponseCodeError(response.status_code, response.text)
         if response.status_code == 200:
             return response.json()
 
-    def arm_home(self, sub_id: Optional[int] = None):
+    def arm_home(self, sub_id: Optional[int] = None, code: Optional[str] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
+        data = None
+        if code is None:
+            data = {
+              "Operate": {
+                "moduleOperateCode": code
+              }
+            }
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_ArmHome.replace('{}', sid)}",
-                                       method=consts.Method.PUT)
+                                       method=consts.Method.PUT, data=data)
 
-    def arm_away(self, sub_id: Optional[int] = None):
+    def arm_away(self, sub_id: Optional[int] = None, code: Optional[str] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
+        data = None
+        if code is None:
+            data = {
+              "Operate": {
+                "moduleOperateCode": code
+              }
+            }
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_ArmAway.replace('{}', sid)}",
-                                       method=consts.Method.PUT)
+                                       method=consts.Method.PUT, data=data)
 
-    def disarm(self, sub_id: Optional[int] = None):
+    def disarm(self, sub_id: Optional[int] = None, code: Optional[str] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
+        data = None
+        if code is None:
+            data = {
+              "Operate": {
+                "moduleOperateCode": code
+              }
+            }
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_Disarm.replace('{}', sid)}",
-                                       method=consts.Method.PUT)
+                                       method=consts.Method.PUT, data=data)
 
     def subsystem_status(self):
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.SubSystemStatus}")
