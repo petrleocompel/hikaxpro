@@ -17,11 +17,15 @@ _LOGGER = logging.getLogger(__name__)
 class HikAxPro:
     """HikVisison Ax Pro Alarm panel coordinator."""
 
-    def __init__(self, host, username, password):
+    host: str
+    username: str
+    password: str
+    _cookie: Optional[str] = None
+
+    def __init__(self, host: str, username: str, password: str):
         self.host = host
         self.username = username
         self.password = password
-        self.cookie = ''
 
     def get_session_params(self):
         q_user = urllib.parse.quote(self.username)
@@ -130,18 +134,29 @@ class HikAxPro:
                     if session_id is not None:
                         cookie = "WebSession=" + session_id
                 else:
-                    self.cookie = cookie.split(";")[0]
+                    self._cookie = cookie.split(";")[0]
 
                 if cookie is None:
                     raise Exception("No cookie provided")
 
-                self.cookie = cookie
+                self._cookie = cookie
                 result = True
         except Exception as e:
             _LOGGER.error("Error in parsing response", exc_info=e)
             result = False
+            self._cookie = None
 
         return result
+
+    def logout(self):
+        response = self._base_json_request(f"http://{self.host}{consts.Endpoints.Session_Logout}", method=consts.Method.PUT)
+        if response.status_code != 200:
+            raise errors.UnexpectedResponseCodeError(response.status_code, response.text)
+        self._cookie = ''
+        return response.status_code == 200
+
+    def is_logged_in(self):
+        return self._cookie is not None
 
     @staticmethod
     def build_url(endpoint: str, is_json: bool = False):
@@ -265,7 +280,7 @@ class HikAxPro:
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.RepeaterStatus}")
 
     def make_request(self, endpoint, method, data=None, is_json=False):
-        headers = {"Cookie": self.cookie}
+        headers = {"Cookie": self._cookie}
 
         if method == consts.Method.GET:
             response = requests.get(endpoint, headers=headers)
