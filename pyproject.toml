@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hikaxpro"
-version = "2.0.0"
+version = "2.1.0"
 description = "Hikvision AX Pro alarm kit ISAPI integration for home assistant alarm panel"
 repository = "https://github.com/petrleocompel/hikaxpro/"
 readme = "README.md"
@@ -28,7 +28,7 @@ requires-python = ">=3.9"
 dev = ["pytest", "requests_mock"]
 
 [tool.bumpver]
-current_version = "2.0.0"
+current_version = "2.1.0"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "chore: release version {new_version}"
 commit = true
