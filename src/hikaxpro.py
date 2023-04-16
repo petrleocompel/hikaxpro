@@ -255,7 +255,7 @@ class HikAxPro:
                 response = requests.post(endpoint, data=data, headers=headers)
         elif method == consts.Method.PUT:
             if is_json:
-                response = requests.post(endpoint, json=data, headers=headers)
+                response = requests.put(endpoint, json=data, headers=headers)
             else:
                 response = requests.put(endpoint, data=data, headers=headers)
         else:
