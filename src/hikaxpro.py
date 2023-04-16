@@ -70,7 +70,7 @@ class HikAxPro:
         challenge = HikAxPro._root_get_value(root, namespaces, "xmlns:challenge")
         salt = HikAxPro._root_get_value(root, namespaces, "xmlns:salt")
         salt2 = HikAxPro._root_get_value(root, namespaces, "xmlns:salt2")
-        is_irreversible = HikAxPro._root_get_value(root, namespaces, "xmlns:isIrreversible", False)
+        is_irreversible = True if HikAxPro._root_get_value(root, namespaces, "xmlns:isIrreversible", False) == 'true' else False
         iterations = HikAxPro._root_get_value(root, namespaces, "xmlns:iterations")
         if iterations is not None:
             iterations = int(iterations)
