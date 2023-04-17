@@ -175,36 +175,24 @@ class HikAxPro:
     def arm_home(self, sub_id: Optional[int] = None, code: Optional[str] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
         data = None
-        if code is None:
-            data = {
-              "Operate": {
-                "moduleOperateCode": code
-              }
-            }
+        if code is not None:
+            data = {"Operate": {"moduleOperateCode": code}}
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_ArmHome.replace('{}', sid)}",
                                        method=consts.Method.PUT, data=data)
 
     def arm_away(self, sub_id: Optional[int] = None, code: Optional[str] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
         data = None
-        if code is None:
-            data = {
-              "Operate": {
-                "moduleOperateCode": code
-              }
-            }
+        if code is not None:
+            data = {"Operate": {"moduleOperateCode": code}}
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_ArmAway.replace('{}', sid)}",
                                        method=consts.Method.PUT, data=data)
 
     def disarm(self, sub_id: Optional[int] = None, code: Optional[str] = None):
         sid = "0xffffffff" if sub_id is None else str(sub_id)
         data = None
-        if code is None:
-            data = {
-              "Operate": {
-                "moduleOperateCode": code
-              }
-            }
+        if code is not None:
+            data = {"Operate": {"moduleOperateCode": code}}
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.Alarm_Disarm.replace('{}', sid)}",
                                        method=consts.Method.PUT, data=data)
 
