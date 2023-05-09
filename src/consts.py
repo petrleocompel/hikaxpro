@@ -13,6 +13,7 @@ class Endpoints:
     CheckResultCap = "/ISAPI/SecurityCP/CheckResult/capabilities"
     CheckResult = "/ISAPI/SecurityCP/CheckResult"
     ConfCap = "/ISAPI/SecurityCP/Configuration/capabilities"
+    ZonesConfig = "/ISAPI/SecurityCP/Configuration/zones"
     DeviceTime = "/ISAPI/SecurityCP/Configuration/deviceTime"
     EventRecordCap = "/ISAPI/SecurityCP/Configuration/eventRecord/channels/2/capabilities"
     EventRecord = "/ISAPI/SecurityCP/Configuration/eventRecord/channels/1"
