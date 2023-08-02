@@ -53,11 +53,25 @@ def test_encodePassword_Irrevesible(theaxpro):
     iteration = 100
     salt = '22CF57B6ADE75214A4C87042B3272630C55EF5D782AB3BE4C9EC4DA1CD95AF3B'
     salt2 = '7BEB8CA39D05B89CABC4003FDCBA5AE73556CB8008BCEE3CBCA48CABC3AC201B'
-    sessionCap = SessionLoginCap.SessionLoginCap(sessionID, challange, salt, salt2, True, iteration)    
+    sessionCap = SessionLoginCap.SessionLoginCap(sessionID, "2.1", challange, salt, salt2, True, iteration)
 
     encodedPassword = theaxpro.encode_password(sessionCap)
 
     assert encodedPassword == "777b95a40f8b5b9ca25101d3c73168adb340f2001b611a74104c34352962d647"
+
+
+def test_encodePassword_Irrevesible_olderVersion():
+    theaxpro = hikaxpro.HikAxPro("192.168.72.136", "dalferin", "test123456")
+    sessionID = "2c9ac7c6d7002d6bc1359c59c7968fd6683569cf47ad149826cf1e5c84cbb7"
+    challange = "9524eedd2912a46ef2c0fcfa27e412c1"
+    iteration = 100
+    salt = "bef6d541c1ac37f74d90b9d3dc642ab6ea54b17d653b10f24464867b6dbeacb5"
+    salt2 = None
+    sessionCap = SessionLoginCap.SessionLoginCap(sessionID, "2.1", challange, salt, salt2, True, iteration)
+
+    encodedPassword = theaxpro.encode_password(sessionCap)
+
+    assert encodedPassword == '86c59b2a28aafd52ccbd@a46f06200e50467cec0758eb32a8c5d5cce5b55abc'
 
 def test_encodePassword_Not_Irreversible(theaxpro):
     sessionID = ''
@@ -65,7 +79,7 @@ def test_encodePassword_Not_Irreversible(theaxpro):
     iteration = 100
     salt = '22CF57B6ADE75214A4C87042B3272630C55EF5D782AB3BE4C9EC4DA1CD95AF3B'
     salt2 = '7BEB8CA39D05B89CABC4003FDCBA5AE73556CB8008BCEE3CBCA48CABC3AC201B'
-    sessionCap = SessionLoginCap.SessionLoginCap(sessionID, challange, salt, salt2, False, iteration)    
+    sessionCap = SessionLoginCap.SessionLoginCap(sessionID, "2", challange, salt, salt2, False, iteration)
 
     encodedPassword = theaxpro.encode_password(sessionCap)
     assert encodedPassword == "2b31a14ba59914a8e5e5510063e5d500ef322e76bc6c160df6a86b35c1e89ddd"

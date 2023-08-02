@@ -72,10 +72,12 @@ class HikAxPro:
         salt2 = HikAxPro._root_get_value(root, namespaces, "xmlns:salt2")
         is_irreversible = True if HikAxPro._root_get_value(root, namespaces, "xmlns:isIrreversible", False) == 'true' else False
         iterations = HikAxPro._root_get_value(root, namespaces, "xmlns:iterations")
+        session_id_version = HikAxPro._root_get_value(root, namespaces, "xmlns:sessionIDVersion", None)
         if iterations is not None:
             iterations = int(iterations)
         session_cap = SessionLoginCap.SessionLoginCap(
             session_id=session_id,
+            session_id_version=session_id_version,
             challenge=challenge,
             salt=salt,
             salt2=salt2,
@@ -85,7 +87,13 @@ class HikAxPro:
         return session_cap
 
     def encode_password(self, session_cap: SessionLoginCap.SessionLoginCap):
-        if session_cap.is_irreversible:
+        if session_cap.session_id_version == "2" and session_cap.is_irreversible:
+            result = sha256.sha256(f"{self.username}{session_cap.salt}{self.password}")
+            result = sha256.sha256(f"{result}{session_cap.challenge}")
+
+            for i in range(2, session_cap.iterations):
+                result = sha256.sha256(result)
+        elif session_cap.is_irreversible:
             result = sha256.sha256(f"{self.username}{session_cap.salt}{self.password}")
             result = sha256.sha256(f"{self.username}{session_cap.salt2}{result}")
             result = sha256.sha256(f"{result}{session_cap.challenge}")
@@ -109,7 +117,8 @@ class HikAxPro:
             SessionLogin.SessionLogin(
                 params.session_id,
                 self.username,
-                encoded_password
+                encoded_password,
+                params.session_id_version
             )
         )
 
