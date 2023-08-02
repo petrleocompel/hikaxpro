@@ -35,6 +35,13 @@ class Endpoints:
     SirenStatus = "/ISAPI/SecurityCP/status/sirenStatus"
     RepeaterStatus = "/ISAPI/SecurityCP/status/repeaterStatus"
     KeypadStatus = "/ISAPI/SecurityCP/status/keypadStatus"
+    OutputStatus = "/ISAPI/SecurityCP/status/outputStatus"
+    BatteriesStatus = "/ISAPI/SecurityCP/status/batteries"
+    HostCapabilities = "/ISAPI/SecurityCP/control/capabilities"
+    SystemDeviceInfo = "/ISAPI/System/deviceInfo"
+    OutputConfig = "/ISAPI/SecurityCP/Configuration/outputs"
+    SirensConfig = "/ISAPI/SecurityCP/Configuration/wirelessSiren"
+
 
 
 class Method:
