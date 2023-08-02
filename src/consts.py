@@ -41,7 +41,7 @@ class Endpoints:
     SystemDeviceInfo = "/ISAPI/System/deviceInfo"
     OutputConfig = "/ISAPI/SecurityCP/Configuration/outputs"
     SirensConfig = "/ISAPI/SecurityCP/Configuration/wirelessSiren"
-
+    OutputControl = "/ISAPI/SecurityCP/control/outputs/{}"
 
 
 class Method:
