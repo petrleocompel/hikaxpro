@@ -1,4 +1,4 @@
-from typing import Optional, Any, Union
+from typing import Optional, Any, Union, Final
 
 import requests
 from xml.etree import ElementTree
@@ -13,6 +13,9 @@ import urllib.parse
 
 _LOGGER = logging.getLogger(__name__)
 
+USER_LEVEL_INSTALLER: Final = 0
+USER_LEVEL_ADMIN_OPERATOR: Final = 1
+
 
 class HikAxPro:
     """HikVisison Ax Pro Alarm panel coordinator."""
@@ -21,19 +24,23 @@ class HikAxPro:
     username: str
     password: str
     _cookie: Optional[str] = None
+    user_level: Optional[int] = None
 
-    def __init__(self, host: str, username: str, password: str):
+    def __init__(self, host: str, username: str, password: str, user_level: Optional[int] = None):
         self.host = host
         self.username = username
         self.password = password
+        self.user_level = user_level
 
     def get_session_params(self):
         q_user = urllib.parse.quote(self.username)
+        headers = {"X-Userlevel": str(self.user_level)}
         # q_password = urllib.parse.quote(self.password)
         # TODO needs basic auth ?
         # response = \
         #  requests.get(f"http://{q_user}:{q_password}@{self.host}{consts.Endpoints.Session_Capabilities}{q_user}")
-        response = requests.get(f"http://{self.host}{consts.Endpoints.Session_Capabilities}{q_user}")
+        response = requests.get(f"http://{self.host}{consts.Endpoints.Session_Capabilities}{q_user}",
+                                headers=headers)
         _LOGGER.debug("Session_Capabilities response")
         _LOGGER.debug("Status: %s", response.status_code)
         _LOGGER.debug("Content: %s", response.content)
@@ -278,6 +285,8 @@ class HikAxPro:
 
     def make_request(self, endpoint, method, data=None, is_json=False):
         headers = {"Cookie": self._cookie}
+        if self.user_level is not None:
+            headers["X-Userlevel"] = str(self.user_level)
 
         if method == consts.Method.GET:
             response = requests.get(endpoint, headers=headers)
