@@ -15,6 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 USER_LEVEL_INSTALLER: Final = 0
 USER_LEVEL_ADMIN_OPERATOR: Final = 1
+MAX_AUTH_RETRIES: Final = 1
 
 
 class HikAxPro:
@@ -117,6 +118,10 @@ class HikAxPro:
 
     def connect(self):
         params = self.get_session_params()
+        if params is None:
+            _LOGGER.error("Failed to get session capabilities; cannot authenticate")
+            self._cookie = None
+            return False
 
         encoded_password = self.encode_password(params)
 
@@ -284,27 +289,38 @@ class HikAxPro:
         return self._base_json_request(f"http://{self.host}{consts.Endpoints.RepeaterStatus}")
 
     def make_request(self, endpoint, method, data=None, is_json=False):
-        headers = {"Cookie": self._cookie}
-        if self.user_level is not None:
-            headers["X-Userlevel"] = str(self.user_level)
+        response = None
+        for attempt in range(MAX_AUTH_RETRIES + 1):
+            headers = {"Cookie": self._cookie}
+            if self.user_level is not None:
+                headers["X-Userlevel"] = str(self.user_level)
 
-        if method == consts.Method.GET:
-            response = requests.get(endpoint, headers=headers)
-        elif method == consts.Method.POST:
-            if is_json:
-                response = requests.post(endpoint, json=data, headers=headers)
+            if method == consts.Method.GET:
+                response = requests.get(endpoint, headers=headers)
+            elif method == consts.Method.POST:
+                if is_json:
+                    response = requests.post(endpoint, json=data, headers=headers)
+                else:
+                    response = requests.post(endpoint, data=data, headers=headers)
+            elif method == consts.Method.PUT:
+                if is_json:
+                    response = requests.put(endpoint, json=data, headers=headers)
+                else:
+                    response = requests.put(endpoint, data=data, headers=headers)
             else:
-                response = requests.post(endpoint, data=data, headers=headers)
-        elif method == consts.Method.PUT:
-            if is_json:
-                response = requests.put(endpoint, json=data, headers=headers)
-            else:
-                response = requests.put(endpoint, data=data, headers=headers)
-        else:
-            return None
+                return None
 
-        if response.status_code == 401:
-            self.connect()
-            response = self.make_request(endpoint, method, data, is_json)
+            if response.status_code != 401 or attempt >= MAX_AUTH_RETRIES:
+                return response
+
+            _LOGGER.warning(
+                "Received 401 for %s; attempting re-authentication (%s/%s)",
+                endpoint,
+                attempt + 1,
+                MAX_AUTH_RETRIES,
+            )
+            if not self.connect():
+                _LOGGER.error("Re-authentication failed for %s", endpoint)
+                return response
 
         return response

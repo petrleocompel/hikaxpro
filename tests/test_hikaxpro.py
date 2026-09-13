@@ -103,6 +103,57 @@ def test_connect_successfull(theaxpro, **kwargs):
     loginResult = theaxpro.connect()
     assert loginResult is True
 
+
+@requests_mock.Mocker(kw='mock')
+def test_connect_returns_false_when_session_capabilities_fail(theaxpro, **kwargs):
+    url = f"http://{theaxpro.host}{consts.Endpoints.Session_Capabilities}{theaxpro.username}"
+    kwargs["mock"].get(url, status_code=401)
+
+    assert theaxpro.connect() is False
+    assert theaxpro._cookie is None
+
+
+@requests_mock.Mocker(kw='mock')
+def test_make_request_does_not_recurse_when_reauth_fails(theaxpro, **kwargs):
+    theaxpro._cookie = "WebSession=expired"
+    endpoint = f"http://{theaxpro.host}{consts.Endpoints.InterfaceInfo}"
+    caps_url = f"http://{theaxpro.host}{consts.Endpoints.Session_Capabilities}{theaxpro.username}"
+
+    kwargs["mock"].get(endpoint, status_code=401)
+    kwargs["mock"].get(caps_url, status_code=401)
+
+    response = theaxpro.make_request(endpoint, consts.Method.GET)
+
+    assert response.status_code == 401
+    assert kwargs["mock"].call_count == 2
+
+
+@requests_mock.Mocker(kw='mock')
+def test_make_request_retries_once_after_successful_reauth(theaxpro, **kwargs):
+    theaxpro._cookie = "WebSession=expired"
+    endpoint = f"http://{theaxpro.host}{consts.Endpoints.InterfaceInfo}"
+    caps_url = f"http://{theaxpro.host}{consts.Endpoints.Session_Capabilities}{theaxpro.username}"
+    session_login_url = f"http://{theaxpro.host}{consts.Endpoints.Session_Login}"
+    response_text = """<SessionLoginCap version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
+                            <sessionID>116c191b1981ca41fd110a4140e63c522c0d168a460fed22bc0b4ca84e18fe0e</sessionID>
+                            <challenge>f0a902b12718652487db2b0cd9e83c4a</challenge><iterations>100</iterations>
+                            <isSupportRTSPWithSession>true</isSupportRTSPWithSession>
+                            <isIrreversible>true</isIrreversible>
+                            <sessionIDVersion>2.1</sessionIDVersion>
+                            <salt>22CF57B6ADE75214A4C87042B3272630C55EF5D782AB3BE4C9EC4DA1CD95AF3B</salt>
+                            <salt2>7BEB8CA39D05B89CABC4003FDCBA5AE73556CB8008BCEE3CBCA48CABC3AC201B</salt2>
+                        </SessionLoginCap>"""
+
+    kwargs["mock"].get(endpoint, [{"status_code": 401}, {"status_code": 200, "text": "<NetworkInterface></NetworkInterface>"}])
+    kwargs["mock"].get(caps_url, text=response_text, status_code=200)
+    kwargs["mock"].post(session_login_url, headers={"Set-Cookie": "WebSession=fresh"}, status_code=200)
+
+    response = theaxpro.make_request(endpoint, consts.Method.GET)
+
+    assert response.status_code == 200
+    assert theaxpro._cookie == "WebSession=fresh"
+
+
 def test_buildUrl_json(theaxpro):    
     url = theaxpro.build_url("http://blabla.com", True)
     assert url == "http://blabla.com?format=json"
