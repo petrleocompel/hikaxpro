@@ -155,7 +155,7 @@ class HikAxPro:
                     if session_id is not None:
                         cookie = "WebSession=" + session_id
                 else:
-                    self._cookie = cookie.split(";")[0]
+                    cookie = cookie.split(";")[0]
 
                 if cookie is None:
                     raise Exception("No cookie provided")

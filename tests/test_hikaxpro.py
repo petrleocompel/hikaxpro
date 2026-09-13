@@ -99,9 +99,10 @@ def test_connect_successfull(theaxpro, **kwargs):
 
     kwargs["mock"].get(url, text=responseText, status_code=200)
     sessionLoginUrl = f"http://{theaxpro.host}{consts.Endpoints.Session_Login}" 
-    kwargs["mock"].post(sessionLoginUrl, headers={"Set-Cookie": "blabla;bla"}, status_code=200)
+    kwargs["mock"].post(sessionLoginUrl, headers={"Set-Cookie": "WebSession=abc123; Path=/; HttpOnly"}, status_code=200)
     loginResult = theaxpro.connect()
     assert loginResult is True
+    assert theaxpro._cookie == "WebSession=abc123"
 
 
 @requests_mock.Mocker(kw='mock')
